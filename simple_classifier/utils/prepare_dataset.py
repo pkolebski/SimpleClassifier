@@ -35,9 +35,9 @@ def save_dataset(images: List[str], classes_: List[Tuple[int, int, int]], path: 
 
 @click.command()
 @click.option("--dataset_path", default=str(DATA_PATH),
-              help="Path to downloaded nad extrcted dataset")
-@click.option("--test_size", default=0.2, help="Test set size in (0, 1>")
-@click.option("--val_size", default=0.2, help="Validation set size in (0, 1>")
+              help="Path to downloaded nad extrcted dataset", show_default=True)
+@click.option("--test_size", default=0.2, help="Test set size in (0, 1>", show_default=True)
+@click.option("--val_size", default=0.2, help="Validation set size in (0, 1>", show_default=True)
 def prepare_dataset(data_path: Union[pathlib.Path, str], test_size: float, val_size: float):
     if not isinstance(data_path, pathlib.Path):
         data_path = pathlib.Path(data_path)
