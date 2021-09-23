@@ -78,7 +78,7 @@ class Resnet34(pl.LightningModule):
         return optimizer
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        if self.train_dataset:
+        if self.train_dataset_path:
             train_dataset = SimpleDataset(DATA_PATH / "train_set", self.annotations_path,
                                           self.train_transforms)
             return DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True,
@@ -86,7 +86,7 @@ class Resnet34(pl.LightningModule):
         return None
 
     def val_dataloader(self) -> TRAIN_DATALOADERS:
-        if self.val_dataset:
+        if self.val_dataset_path:
             val_dataset = SimpleDataset(self.val_dataset_path, self.annotations_path,
                                         self.train_transforms)
             return DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False,
@@ -94,7 +94,7 @@ class Resnet34(pl.LightningModule):
         return None
 
     def test_dataloader(self) -> TRAIN_DATALOADERS:
-        if self.test_dataset:
+        if self.test_dataset_path:
             test_dataset = SimpleDataset(self.test_dataset_path, self.annotations_path,
                                          self.train_transforms)
             return DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False,
@@ -121,19 +121,19 @@ class Resnet34(pl.LightningModule):
               help="Path to test dataset", show_default=True)
 @click.option("--annotations_path", default=str(DATA_PATH / "annotations.json"),
               help="Path to datasets annotations", show_default=True)
-@click.option("--epochs", default=10, help="Number of epochs", show_default=True)
+@click.option("--max_epoch", default=10, help="Number of epochs", show_default=True)
 @click.option("--batch_size", default=64, help="Batch size", show_default=True)
-def run_training(train_dataset_path, val_dataset_path, test_dataset_path, annotations_path,
-                 num_classes, batch_size, max_epoch):
-    model = Resnet34(train_dataset_path, val_dataset_path, test_dataset_path, annotations_path,
-                     num_classes, batch_size)
+@click.option("--gpus", default=0, help="Number of GPUs to use", show_default=True)
+def run_training(train_dataset, val_dataset, test_dataset, annotations_path, batch_size, max_epoch,
+                 gpus):
+    model = Resnet34(train_dataset, val_dataset, test_dataset, annotations_path, 3, batch_size)
     logger = loggers.TensorBoardLogger(model.__class__.__name__)
     checkpoint = ModelCheckpoint(monitor="val/loss")
     trainer = Trainer(max_epochs=max_epoch, logger=logger, log_every_n_steps=1,
-                      callbacks=[checkpoint])
+                      callbacks=[checkpoint], gpus=gpus)
     trainer.fit(model)
     trainer.test(model)
 
 
-if __name__ == "__train__":
+if __name__ == "__main__":
     run_training()
